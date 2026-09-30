@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Electricity Monitor</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:1000px;margin:40px auto;padding:0 20px;background:#f6f7fb}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card{background:white;border-radius:14px;padding:20px;box-shadow:0 2px 10px #0001}
+.value{font-size:28px;font-weight:700}
+table{width:100%;background:white;border-radius:12px;padding:10px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #eee}
+</style></head>
+<body>
+<h1>⚡ Electricity Monitor</h1><p>Simulation mode — ไม่มีอุปกรณ์จริง</p>
+<div class="grid">
+<div class="card">หน่วยไฟวันนี้<div id="total" class="value">-</div>kWh</div>
+<div class="card">ค่าเฉลี่ยต่อข้อมูล<div id="avg" class="value">-</div>kWh</div>
+<div class="card">ค่าสูงสุด<div id="max" class="value">-</div>kWh</div>
+<div class="card">จำนวนข้อมูล<div id="count" class="value">-</div>records</div>
+</div>
+<h2>Notifications</h2><div id="notifications">กำลังโหลด...</div>
+<script>
+const meter='SIM-001';
+async function load(){
+ const s=await fetch(`/api/statistics/daily?meterId=${meter}`).then(r=>r.json());
+ total.textContent=s.totalKwh.toFixed(3); avg.textContent=s.averageKwhPerReading.toFixed(4);
+ max.textContent=s.maxKwhPerReading.toFixed(4); count.textContent=s.readingCount;
+ const n=await fetch('/api/notifications?unreadOnly=true').then(r=>r.json());
+ notifications.innerHTML=n.length?'<table><tr><th>เวลา</th><th>ข้อความ</th></tr>'+
+ n.map(x=>`<tr><td>${new Date(x.timestamp).toLocaleString('th-TH')}</td><td>${x.message}</td></tr>`).join('')+
+ '</table>':'<div class="card">ยังไม่มีการแจ้งเตือน</div>';
+}
+load();setInterval(load,5000);
+</script></body></html>

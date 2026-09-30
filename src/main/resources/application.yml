@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: electricity-monitor
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/electricity}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Bangkok
+
+server:
+  port: ${PORT:8080}
+
+app:
+  simulator:
+    enabled: ${SIMULATOR_ENABLED:true}
+    interval-ms: ${SIMULATOR_INTERVAL_MS:10000}
+    meter-id: ${SIMULATOR_METER_ID:SIM-001}
+  anomaly:
+    multiplier: ${ANOMALY_MULTIPLIER:1.5}
+    minimum-history: ${ANOMALY_MINIMUM_HISTORY:6}
+  timezone: ${APP_TIMEZONE:Asia/Bangkok}

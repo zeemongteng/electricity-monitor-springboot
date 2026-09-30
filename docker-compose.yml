@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: electricity
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+  app:
+    build: .
+    depends_on: [db]
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/electricity
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      SIMULATOR_ENABLED: "true"
+      SIMULATOR_INTERVAL_MS: "10000"
+    ports: ["8080:8080"]
+volumes:
+  postgres_data:

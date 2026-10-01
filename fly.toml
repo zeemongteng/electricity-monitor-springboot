@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for electricity-monitor-springboot-satin-harborwave-4748 on 2026-10-01T06:51:20+07:00
+# fly.toml app configuration file generated for electricity-monitor-springboot-frosty-branch-9245 on 2026-10-01T06:57:08+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'electricity-monitor-springboot-satin-harborwave-4748'
+app = 'electricity-monitor-springboot-frosty-branch-9245'
 primary_region = 'sin'
 
 [build]

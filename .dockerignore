@@ -1,0 +1,8 @@
+# flyctl launch added from .gitignore
+**/target
+**/.idea
+**/*.iml
+**/.vscode
+**/.env
+**/.DS_Store
+fly.toml

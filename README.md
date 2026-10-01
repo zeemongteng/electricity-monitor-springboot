@@ -77,6 +77,34 @@ SIMULATOR_INTERVAL_MS=10000
 ANOMALY_MULTIPLIER=1.5
 ```
 
+## Deploy on Fly.io (verified working)
+
+App: `electricity-monitor-springboot-frosty-branch-9245` (region `sin`, http_service on 8080)
+Database: Fly Postgres `elec-database-1234` (unmanaged, `flyio/postgres-flex:18.1`)
+
+```bash
+# one-time: create + attach Fly Postgres (creates DB 'electricity', sets DATABASE_URL secret)
+flyctl postgres create --name elec-database-1234 --region sin --vm-size shared-cpu-1x --volume-size 1
+flyctl postgres attach elec-database-1234 --app electricity-monitor-springboot-frosty-branch-9245 --database-name electricity
+
+# attach sets DATABASE_URL=postgres://... which the JDBC driver CANNOT parse —
+# override with JDBC-format secrets (password = the attach user's password):
+flyctl secrets set -a electricity-monitor-springboot-frosty-branch-9245 \
+  "DATABASE_URL=jdbc:postgresql://elec-database-1234.flycast:5432/electricity?sslmode=disable" \
+  "DATABASE_USERNAME=electricity_monitor_springboot_frosty_branch_9245" \
+  "DATABASE_PASSWORD=<password>"
+
+# deploy the app
+flyctl deploy
+```
+
+Gotchas hit during setup (all fixed):
+- `flyctl postgres attach` writes `postgres://...` into `DATABASE_URL`; Spring's PostgreSQL driver needs `jdbc:postgresql://...`. Fix: set `DATABASE_URL` (jdbc form) + `DATABASE_USERNAME` + `DATABASE_PASSWORD` secrets — all three are already read by `application.yml`.
+- Fly Postgres VMs stop when idle and don't auto-start on connection attempts by default. Enable machine auto-start so the app wakes it:
+  `flyctl machine update <pg-machine-id> -a elec-database-1234 --autostart=true --auto-confirm`
+- Give Hikari enough time to cover PG's boot: `SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=60000` (set via `flyctl machine update <app-machine-id> --env ...=60000`).
+- Fly **trial** accounts cap machines at 5 minutes of runtime (`Trial machine stopping. To run for longer than 5m0s, add a credit card`). Add a card at https://fly.io/trial for always-on machines; without it, machines sleep and wake on request — this recovery path (auto-start + 60s Hikari timeout) was verified working end-to-end.
+
 ## Push to GitHub
 ```bash
 git init
